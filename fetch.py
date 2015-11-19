@@ -1,5 +1,7 @@
-from flask import Flask
-from flask import jsonify
+import json
+from isodate import parse_duration as _
+from urllib2 import urlopen
+from flask import Flask, jsonify
 from pytube import YouTube
 from xml.etree import ElementTree
 import os
@@ -8,6 +10,8 @@ import cv2
 import numpy
 
 app = Flask(__name__)
+
+
 
 @app.route("/fetch/<id>")
 def process(id=None):
@@ -20,6 +24,12 @@ def process(id=None):
 
 
     return jsonify(num_frames = frames)
+
+def get_duration(id):
+    """ Get Youtube video duration for a video """
+    raw_data = urlopen("https://www.googleapis.com/youtube/v3/videos?id=" + id + "&key=AIzaSyAYsu0030jO6YPDHChQyh7xKX9mSRR1Tto&part=contentDetails").read()
+    json_data = json.loads(raw_data)
+    return _(json_data['items'][0]['contentDetails']['duration']).total_seconds()
 
 def downloadVideo(video_url, video_id):
     yt = YouTube(video_url)
