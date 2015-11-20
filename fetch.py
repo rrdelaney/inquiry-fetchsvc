@@ -15,18 +15,18 @@ import subprocess
 
 app = Flask(__name__)
 
+# Get video captions
 @app.route("/captions/<id>")
 def process_captions(id=None):
     video_url = "https://www.youtube.com/watch?v=" + id
-
     # navigate to /var/www/cations/<id>
-    path = "/var/www/captions/" + id
-    os.mkdir( path, 0755 )
+    path = "/var/www/captions"
     os.chdir(path)
     # get captions in srt
-    os.system("youtube-dl --write-srt --sub-lang en --skip-download " + video_url)
-    return "DONE"
+    os.system("youtube-dl --write-srt --sub-lang en --skip-download --output " + "'" + id + ".%(ext)s' " + video_url)
+    return jsonify(file_name = id + ".en.srt")
 
+# Process video
 @app.route("/fetch/<id>")
 def process(id=None):
     # Download Video
@@ -61,7 +61,6 @@ def extractVideoFrames(video_id):
     vidcap = cv2.VideoCapture(video_location)
 
     number_frames = math.ceil(vidcap.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT))
-    print number_frames
     count = 0
     frame_count = 0
     frame_number = 1
