@@ -8,6 +8,7 @@ import os
 import sys
 import cv2
 import numpy
+import math
 
 app = Flask(__name__)
 
@@ -20,10 +21,9 @@ def process(id=None):
     video_id = downloadVideo(video_url, id)
 
     # Extract Video FRAMES
-    frames = extractVideoFrames(video_id)
+    total_frames, frames = extractVideoFrames(video_id)
 
-
-    return jsonify(num_frames = frames)
+    return jsonify(total_frames = total_frames, num_frames = frames, duration = get_duration(id))
 
 def get_duration(id):
     """ Get Youtube video duration for a video """
@@ -48,7 +48,7 @@ def extractVideoFrames(video_id):
     video_location = "/var/www/videos/" + video_id + ".mp4"
     vidcap = cv2.VideoCapture(video_location)
 
-    number_frames = vidcap.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT)
+    number_frames = math.ceil(vidcap.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT))
     print number_frames
     count = 0
     frame_count = 0
@@ -57,7 +57,7 @@ def extractVideoFrames(video_id):
     while (count < number_frames):
       frame_count += 1
       if (frame_count == 24):
-          success,image = vidcap.retrieve()
+          success,image = vidcap.read()
           cv2.imwrite("/var/www/frames/" + video_id + "/%d.jpg" % frame_number, image)
           frame_count = 0;
           frame_number += 1;
@@ -65,7 +65,7 @@ def extractVideoFrames(video_id):
           vidcap.grab()
       count += 1
 
-    return frame_number
+    return number_frames, frame_number - 1
 
 
 if __name__ == "__main__":
