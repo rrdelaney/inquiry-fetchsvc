@@ -40,17 +40,18 @@ def process(id=None):
     # Download Video
     video_url = "https://www.youtube.com/watch?v=" + id
     video_id = downloadVideo(video_url, id)
-
     # Extract Video FRAMES
     total_frames, frames = extractVideoFrames(video_id)
-
-    return jsonify(total_frames = total_frames, num_frames = frames, duration = get_duration(id) - 1)
+    d = get_duration(id)
+    d = d - 1
+    return jsonify(total_frames = total_frames, num_frames = frames, duration = d)
 
 def get_duration(id):
     """ Get Youtube video duration for a video """
     raw_data = urlopen("https://www.googleapis.com/youtube/v3/videos?id=" + id + "&key=AIzaSyAYsu0030jO6YPDHChQyh7xKX9mSRR1Tto&part=contentDetails").read()
     json_data = json.loads(raw_data)
     return _(json_data['items'][0]['contentDetails']['duration']).total_seconds()
+
 
 def downloadVideo(video_url, video_id):
     yt = YouTube(video_url)
@@ -62,7 +63,14 @@ def downloadVideo(video_url, video_id):
 def extractVideoFrames(video_id):
     # make directory
     path = "/var/www/frames/" + video_id
-    os.mkdir( path, 0755 )
+
+    try:
+        os.mkdir(path)
+    except OSError as error:
+        print "EXCEPTION RAISED: " + error
+        return error
+    else:
+        print "DIRECTORY MADE"
 
     # Extract frames
     video_location = "/var/www/videos/" + video_id + ".mp4"
