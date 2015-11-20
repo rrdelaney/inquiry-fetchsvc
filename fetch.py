@@ -15,6 +15,18 @@ import subprocess
 
 app = Flask(__name__)
 
+@app.route("/captions/<id>")
+def process_captions(id=None):
+    video_url = "https://www.youtube.com/watch?v=" + id
+
+    # navigate to /var/www/cations/<id>
+    path = "/var/www/captions/" + id
+    os.mkdir( path, 0755 )
+    os.chdir(path)
+    # get captions in srt
+    os.system("youtube-dl --write-srt --sub-lang en --skip-download " + video_url)
+    return "DONE"
+
 @app.route("/fetch/<id>")
 def process(id=None):
     # Download Video
@@ -43,7 +55,6 @@ def extractVideoFrames(video_id):
     # make directory
     path = "/var/www/frames/" + video_id
     os.mkdir( path, 0755 )
-    print "Directory Made"
 
     # Extract frames
     video_location = "/var/www/videos/" + video_id + ".mp4"
