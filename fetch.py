@@ -18,14 +18,6 @@ app = Flask(__name__)
 
 # Get video captions
 @app.route("/captions/<id>")
-# def process_captions(id=None):
-#     video_url = "https://www.youtube.com/watch?v=" + id
-#     # navigate to /var/www/cations/<id>
-#     path = "/var/www/captions"
-#     os.chdir(path)
-#     # get captions in srt
-#     os.system("youtube-dl --write-srt --sub-lang en --skip-download --output " + "'" + id + ".%(ext)s' " + video_url)
-#     return jsonify(file_name = id + ".en.srt")
 def process_captions(id=None):
     video_url = "https://www.youtube.com/watch?v=" + id
     # navigate to /var/www/cations/<id>
