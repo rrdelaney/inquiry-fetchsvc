@@ -55,6 +55,10 @@ class Application extends Controller {
       }
    }
 
+   def extractAudio(video_id: String, extension: String) {
+      val extract_audio = s"ffmpeg -i /var/www/videos/$video_id.$extension -ab 160k -ac 2 -ar 44100 -vn /var/www/audio/$video_id.mp3" !!
+   }
+
    def index(video_id : String) = Action{implicit request =>
       val extension = downloadVideo(video_id)
       val duration = extractFrames(video_id, extension)
@@ -62,11 +66,15 @@ class Application extends Controller {
       val total_frames = totalFrames(video_id, duration, extension)
       val cap_exists = new java.io.File(s"/var/www/videos/$video_id.en.srt").exists
 
+      extractAudio(video_id, extension)
+      val audio_exists = new java.io.File(s"/var/www/audio/$video_id.mp3").exists
+
       val res = Json.obj(
         "num_frames" -> frames,
         "total_frames" -> total_frames.toInt,
         "duration" -> duration.toInt,
-        "downloaded_caption" -> cap_exists
+        "downloaded_caption" -> cap_exists,
+        "extracted_audio" -> audio_exists
       )
       Ok(res)
    }
